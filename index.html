@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <title>No Pulse — Combat Test</title>
+  <meta name="description" content="Playable top-down twin-stick combat prototype for No Pulse: Shadow, Wolf and Buck against the Hollows of Southside.">
+  <link rel="icon" type="image/svg+xml" href="./assets/no-pulse-mark.svg">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./assets/icon-180.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="No Pulse">
+  <meta name="theme-color" content="#0f1216">
+  <link rel="preconnect" href="https://api.fontshare.com">
+  <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&f[]=satoshi@500,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css?v=41">
+</head>
+<body>
+  <canvas id="game"></canvas>
+
+  <!-- Title -->
+  <section class="screen" id="title">
+    <img class="keyart" src="./assets/no-pulse-key-art.jpg" alt="No Pulse key art">
+    <div class="title-copy">
+      <div class="eyebrow">Combat test · Milestone 1 · Southside greybox · v41 ability balance</div>
+      <div class="title-actions">
+        <button class="btn btn-primary btn-lg" id="btnQuick" data-interactive>Quick match</button>
+        <button class="btn btn-lg" id="btnStart" data-interactive>Solo run</button>
+        <button class="btn btn-lg" id="btnHost" data-interactive>Host private</button>
+        <button class="btn btn-lg" id="btnJoin" data-interactive>Join with code</button>
+      </div>
+      <div class="hint mm hidden" id="mmStatus">Looking for a party…</div>
+      <div class="join-row hidden" id="joinRow"><input id="joinCode" maxlength="4" placeholder="ROOM CODE" autocomplete="off" autocapitalize="characters" spellcheck="false" data-interactive><button class="btn btn-primary" id="btnJoinGo" data-interactive>Join</button></div>
+      <p class="hint">Phone: left thumb moves, right thumb holds Attack. Tap a skill to use it on the nearest target; hold and drag it to aim. Keyboard: WASD, mouse to aim, hold click to fire, 1 / 2 / 3 skills (tap for nearest, hold to aim), R ultimate, Space dodge, F swap.</p>
+      <p class="hint a2hs hidden" id="a2hs"><b>iPhone tip:</b> tap Share, then <b>Add to Home Screen</b>, and open it from there. It runs full screen with Safari's zoom and swipe gestures switched off.</p>
+    </div>
+  </section>
+
+  <!-- Co-op lobby -->
+  <section class="screen hidden" id="lobby">
+    <div class="lobby-card">
+      <div class="eyebrow" id="lobbyKind">Co-op lobby · up to 4 survivors</div>
+      <div class="room-row"><h1>Room <span class="code" id="lobbyCode">----</span></h1><button class="btn invite" id="btnInvite" data-interactive>Copy invite link</button></div>
+      <button class="btn pubbtn hidden" id="btnPublic" data-interactive>Private · tap to list for Quick match</button>
+      <p class="hint" id="lobbyHint">Share the room code.</p>
+      <div class="lobby-list" id="lobbyList"></div>
+      <div class="lobby-perks" id="lobbyPerks"></div>
+      <div class="sum-actions">
+        <button class="btn" id="btnLobbyPick" data-interactive>Choose survivor</button>
+        <button class="btn hidden" id="btnLobbyReady" data-interactive>Ready up</button>
+        <button class="btn btn-primary hidden" id="btnLobbyStart" data-interactive>Start run</button>
+        <button class="btn" id="btnLobbyLeave" data-interactive>Leave</button>
+      </div>
+      <div class="hint" id="lobbyStatus">Connecting…</div>
+    </div>
+  </section>
+
+  <!-- Survivor select -->
+  <section class="screen hidden" id="select">
+    <div class="select-head"><div class="eyebrow">Union Terminal</div><h1>Choose your survivor</h1></div>
+    <div class="cards" id="cards"></div>
+    <p class="hint">Three-minute run. Survive the hordes, find gear, reach the extraction point when it opens.</p>
+  </section>
+
+  <!-- HUD (v26: Wild Rift layout) -->
+  <div class="hud hidden" id="hud">
+    <div class="hud-top">
+      <div class="mapwrap">
+        <canvas id="minimap" width="150" height="112" aria-hidden="true"></canvas>
+        <div class="leftcol">
+          <div class="me-card" id="meCard">
+            <img id="hudPortrait" src="./assets/shadow-sm.jpg" alt="">
+            <div class="me-r">
+              <div class="name-row"><strong id="hudName">Shadow</strong><span id="hudHP">850</span></div>
+              <button class="weapon" id="weaponBox" data-interactive>
+                <div class="wrow"><strong id="wName">SMG</strong><span id="wRarity" class="rar common">Common</span></div>
+                <div class="wrow small"><span id="wAmmo">30 / 240</span><span id="wSwap">F · swap</span></div>
+                <div class="reload"><div id="wReload"></div></div>
+              </button>
+            </div>
+          </div>
+          <div class="squad hidden" id="squad"></div>
+        </div>
+      </div>
+      <div class="run">
+        <div class="run-item"><span>Time</span><strong id="hudTime">3:00</strong></div>
+        <div class="run-item"><span>Wave</span><strong id="hudWave">1</strong></div>
+        <div class="run-item"><span>Kills</span><strong id="hudKills">0</strong></div>
+      </div>
+    </div>
+    <div class="objective" id="objective"></div>
+    <div class="quest" id="quest"></div>
+    <div class="toasts" id="toasts"></div>
+    <div class="items" id="items">
+      <button class="ibtn bag" id="btnBag" data-interactive><span class="lbl">Bag</span><i class="badge" id="bagCount">0</i></button>
+    </div>
+    <div class="hud-bottom">
+      <div class="wheel" id="wheel">
+        <button class="wbtn ult" id="btnR" data-interactive><span class="key">R</span><span class="lbl" id="lblR">Ult</span></button>
+        <button class="wbtn ab u" id="btnU" data-interactive><span class="key">3</span><span class="lbl" id="lblU">Utility</span><span class="tag" id="tagU">aim</span><i class="cd"></i><b class="cdn"></b></button>
+        <button class="wbtn ab d" id="btnD" data-interactive><span class="key">2</span><span class="lbl" id="lblD">Damage</span><span class="tag" id="tagD">aim</span><i class="cd"></i><b class="cdn"></b></button>
+        <button class="wbtn ab s" id="btnS" data-interactive><span class="key">1</span><span class="lbl" id="lblS">Sustain</span><span class="tag" id="tagS">tap</span><i class="cd"></i><b class="cdn"></b></button>
+        <button class="wbtn dodge" id="btnDodge" data-interactive><span class="key">Space</span><span class="lbl">Dodge</span><i class="cd"></i><b class="cdn"></b><i class="badge" id="dodgeCount">2</i></button>
+        <button class="wbtn small cancel hidden" id="btnCancel" aria-label="Cancel" data-interactive><span class="x">✕</span></button>
+        <button class="wbtn small special" id="btnSpecial" data-interactive><span class="lbl">Elite</span></button>
+        <button class="wbtn attack" id="btnAttack" data-interactive><svg viewBox="0 0 48 48" width="40" height="40" aria-hidden="true"><path d="M8 40 L30 18 M30 18 l10-10 M26 14 l8 8 M12 44 l-8-8 6-6 8 8z" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      </div>
+    </div>
+    <div class="pickup hidden" id="pickup" data-interactive>
+      <div class="pk-head"><span class="rar" id="pkRar">Rare</span><strong id="pkName">SMG</strong><span class="pk-ilvl" id="pkIlvl">iLvl 2</span></div>
+      <div class="pk-cmp"><div><span>New</span><strong id="pkNewDps">0</strong><em id="pkNewAff"></em></div><div class="pk-vs">vs</div><div><span id="pkCurLabel">Equipped</span><strong id="pkCurDps">0</strong><em id="pkCurAff"></em></div></div>
+      <div class="pk-actions"><button class="btn btn-primary" id="pkEquip" data-interactive>Equip</button><button class="btn" id="pkLater" data-interactive>Keep in bag</button></div>
+      <div class="pk-hint" id="pkHint"></div>
+    </div>
+    <div class="vignette" id="vignette"></div>
+    <div class="debug" id="debug">fps --</div>
+  </div>
+
+  <!-- Rotate prompt (phones held upright) -->
+  <div class="rotate hidden" id="rotate">
+    <div class="rotate-card">
+      <svg viewBox="0 0 64 64" width="72" height="72" aria-hidden="true"><rect x="22" y="6" width="20" height="36" rx="4" fill="none" stroke="#e8e6e1" stroke-width="2.5"/><rect x="6" y="40" width="52" height="18" rx="4" fill="none" stroke="#e67e22" stroke-width="2.5"/><path d="M50 14a14 14 0 0 1 8 12" fill="none" stroke="#e67e22" stroke-width="2.5" stroke-linecap="round"/><path d="M55 22l3 4 4-3" fill="none" stroke="#e67e22" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <h2>Turn your phone sideways</h2>
+      <p>No Pulse plays in landscape: left thumb moves, right thumb attacks and casts, like Wild Rift. Unlock rotation on your phone if it does not turn.</p>
+      <button class="btn" id="btnPortrait" data-interactive>Play upright anyway</button>
+    </div>
+  </div>
+
+  <!-- Backpack (pauses the run) -->
+  <section class="screen hidden" id="bag">
+    <div class="bag-card">
+      <div class="bag-head"><div><div class="eyebrow" id="bagEyebrow">Paused</div><h2>Backpack</h2></div><button class="btn btn-primary" id="bagClose" data-interactive>Resume <small>(B)</small></button></div>
+      <div class="bag-cols">
+        <div><h3>Equipped</h3><div class="bag-list" id="bagEquipped"></div></div>
+        <div><h3>Carried <span id="bagCap"></span></h3><div class="bag-list" id="bagItems"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Summary -->
+  <section class="screen hidden" id="summary">
+    <div class="sum-card">
+      <div class="eyebrow" id="sumEyebrow">Run over</div>
+      <h1 id="sumTitle">Downed in Southside</h1>
+      <div class="sum-grid" id="sumGrid"></div>
+      <div class="sum-board hidden" id="sumBoard"></div>
+      <div class="sum-loot"><h3>Gear found</h3><div id="sumLoot"></div></div>
+      <div class="sum-actions">
+        <button class="btn btn-primary" id="btnAgain" data-interactive>Run it back</button>
+        <button class="btn" id="btnSwitch" data-interactive>Switch survivor</button>
+      </div>
+    </div>
+  </section>
+
+  <script src="./game.js?v=41"></script>
+</body>
+</html>

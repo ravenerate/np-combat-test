@@ -33,6 +33,8 @@ h1 { font-family: var(--font-display); font-weight: 700; text-transform: upperca
 .card .role { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
 .card .name { font-family: var(--font-display); font-weight: 700; font-size: 22px; text-transform: uppercase; letter-spacing: 0.03em; line-height: 1; margin-top: 2px; }
 .card .kit { margin-top: 8px; font-size: 12px; color: var(--muted); line-height: 1.45; }
+.card .who { margin-top: 3px; font-size: 11px; color: var(--role); font-weight: 700; letter-spacing: 0.04em; }
+.card .story { margin-top: 6px; font-size: 12px; line-height: 1.45; color: var(--text); opacity: 0.85; border-left: 2px solid var(--role); padding-left: 8px; }
 .card .kit b { color: var(--text); font-weight: 700; }
 @media (max-width: 640px) {
   .cards { grid-template-columns: 1fr; width: 100%; gap: 8px; }
@@ -604,3 +606,5 @@ h1 { font-family: var(--font-display); font-weight: 700; text-transform: upperca
 .quest i.got { background: var(--c); box-shadow: 0 0 6px var(--c); }
 .quest b { color: var(--text); margin-left: 3px; font-size: 12px; }
 .quest.done { border-color: #2ecc71; color: #2ecc71; }
+
+@media (max-height: 560px) { .card .story { display: none; } .card .who { font-size: 10px; margin-top: 1px; } }
